@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
+import Chart from "react-apexcharts";
 
 export default function TemperatureChart({ data }) {
   const chartData = data.map((item) => {
@@ -7,30 +7,31 @@ export default function TemperatureChart({ data }) {
       value: item.temperatureReading.value,
     };
   });
-  if (chartData) {
-    return (
-      <AreaChart
-        width={350}
-        height={300}
-        data={chartData}
-        margin={{
-          top: 10,
-          right: 30,
-          left: 0,
-          bottom: 0,
-        }}
-      >
-        <XAxis dataKey="timestamp" />
-        <YAxis dataKey="value" domain={["auto", "auto"]} />
-        <Tooltip />
-        <Area
-          type="monotone"
-          dataKey="value"
-          stroke="#8884d8"
-          fill="#8884d8"
-          unit=" °C"
-        />
-      </AreaChart>
-    );
-  }
+
+  const series = [
+    {
+      name: "Temperature",
+      data: chartData,
+    },
+  ];
+
+  const options = {
+    options: {
+      chart: {
+        height: 350,
+        type: "area",
+      },
+      dataLabels: {
+        enabled: true,
+      },
+      stroke: {
+        curve: "smooth",
+      },
+      noData: {
+        text: "Loading...",
+      },
+    },
+  };
+
+  return <Chart options={options} series={series} type="area" height={350} />;
 }
