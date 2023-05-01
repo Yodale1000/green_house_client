@@ -1,12 +1,43 @@
-import React, { useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import React, { useState, useContext } from "react";
+import { DeviceContext } from "./DeviceContext";
+import { Button, Modal, Form } from "react-bootstrap";
 import { PlusCircle } from "react-bootstrap-icons";
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function AddDevice() {
+  const [device, setDevice] = useContext(DeviceContext);
   const [show, setShow] = useState(false);
-
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    axios
+      .post(API_BASE_URL + "/device", {
+        deviceName: name,
+        deviceLocation: location,
+      })
+      .then((response) => {
+        setDevice(response.data);
+        handleClose();
+      })
+      .catch(function (error) {
+        if (error.response) {
+          console.log(error.response.data);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        } else if (error.request) {
+          console.log(error.request);
+        } else {
+          console.log("Error", error.message);
+        }
+        console.log(error.config);
+      });
+  };
 
   return (
     <>
@@ -21,12 +52,33 @@ export default function AddDevice() {
         <Modal.Header closeButton>
           <Modal.Title>Create Device</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleClose}>
-            Create
-          </Button>
-        </Modal.Footer>
+        <Form onSubmit={handleSubmit}>
+          <Modal.Body>
+            <Form.Group className="mb-3" controlId="formBasicEmail">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Device Name"
+                onChange={(event) => setName(event.target.value)}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formBasicEmail">
+              <Form.Label>Location</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Device Location"
+                onChange={(event) => setLocation(event.target.value)}
+                required
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" type="submit">
+              Create
+            </Button>
+          </Modal.Footer>
+        </Form>
       </Modal>
     </>
   );
