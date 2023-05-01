@@ -3,7 +3,7 @@ import { Form, Button, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const HOST = import.meta.env.API_HOST || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function SignUp() {
   const [username, setUsername] = useState("");
@@ -14,7 +14,7 @@ export default function SignUp() {
     event.preventDefault();
     axios
       .post(
-        HOST + "/signin",
+        API_BASE_URL + "/signin",
         {
           username,
           password,

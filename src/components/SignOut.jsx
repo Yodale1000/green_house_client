@@ -4,7 +4,7 @@ import { DoorOpen } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const HOST = import.meta.env.API_HOST || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function SignOut() {
   const [show, setShow] = useState(false);
@@ -17,7 +17,7 @@ export default function SignOut() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     axios
-      .post(HOST + "/signout", { withCredentials: true })
+      .post(API_BASE_URL + "/signout", { withCredentials: true })
       .then((response) => {
         localStorage.removeItem("authenticated");
         navigate("/signin");

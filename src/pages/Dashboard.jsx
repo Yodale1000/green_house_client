@@ -16,18 +16,20 @@ import TemperatureChart from "../components/charts/TemperatureChart";
 import HumidityChart from "../components/charts/HumidityChart";
 import LightChart from "../components/charts/LightChart";
 
-const HOST = import.meta.env.API_HOST || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Dashboard() {
   let [devices, setDevices] = useState([]);
   let [currentDevice, setCurrentDevice] = useState(null);
+  let [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     axios
-      .get(HOST + "/devices")
+      .get(API_BASE_URL + "/devices")
       .then((response) => {
         setDevices(response.data);
         setCurrentDevice(response.data[0]);
+        getChartData(response.data[0].name);
       })
       .catch(function (error) {
         if (error.response) {
@@ -43,12 +45,34 @@ export default function Dashboard() {
       });
   }, []);
 
+  const getChartData = (deviceName) => {
+    axios
+      .get(API_BASE_URL + "/sensorData", {
+        params: { deviceName: deviceName },
+      })
+      .then((response) => {
+        setChartData(response.data);
+      })
+      .catch(function (error) {
+        if (error.response) {
+          console.log(error.response.data);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        } else if (error.request) {
+          console.log(error.request);
+        } else {
+          console.log("Error", error.message);
+        }
+        console.log(error.config);
+      });
+  };
+
   const handleDeviceChange = async (event) => {
     event.preventDefault();
     setCurrentDevice(devices[event.target.id]);
   };
 
-  if (devices && currentDevice) {
+  if (devices && currentDevice && chartData) {
     return (
       <div className="p-2 bg-body-tertiary border rounded-3">
         <Container fluid>
@@ -81,13 +105,13 @@ export default function Dashboard() {
           <hr></hr>
           <Row>
             <Col>
-              <TemperatureChart device={currentDevice}></TemperatureChart>
+              <TemperatureChart data={chartData}></TemperatureChart>
             </Col>
             <Col>
-              <HumidityChart device={currentDevice}></HumidityChart>
+              <HumidityChart data={chartData}></HumidityChart>
             </Col>
             <Col>
-              <LightChart device={currentDevice}></LightChart>
+              <LightChart data={chartData}></LightChart>
             </Col>
           </Row>
         </Container>

@@ -1,51 +1,48 @@
-import React, { useState, useEffect } from "react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
-import axios from "axios";
+import { AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
-const HOST = import.meta.env.API_HOST || "http://localhost:8000";
-
-export default function LightChart({ device }) {
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get(HOST + "/lightReadings", {
-        params: { deviceName: device.name },
-      })
-      .then((response) => response.data)
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  }, []);
-
-  if (data) {
+export default function LightChart({ data }) {
+  const chartData = data.map((item) => {
+    return {
+      timestamp: item.timestamp,
+      visible_plus_ir_value: item.lightReading.visible_plus_ir_value,
+      infrared_value: item.lightReading.infrared_value,
+    };
+  });
+  if (chartData) {
     return (
       <AreaChart
         width={350}
         height={300}
-        data={data}
-        margin={{
-          top: 10,
-          right: 30,
-          left: 0,
-          bottom: 0,
-        }}
+        data={chartData}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <defs>
+          <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <XAxis dataKey="timestamp" />
-        <YAxis dataKey="value" />
+        <YAxis domain={["auto", "auto"]} />
         <Tooltip />
-        <Area type="monotone" dataKey="value" stroke="#8884d8" fill="#8884d8" />
+        <Area
+          type="monotone"
+          dataKey="visible_plus_ir_value"
+          stroke="#8884d8"
+          fillOpacity={1}
+          fill="url(#colorUv)"
+        />
+        <Area
+          type="monotone"
+          dataKey="infrared_value"
+          stroke="#82ca9d"
+          fillOpacity={1}
+          fill="url(#colorPv)"
+        />
       </AreaChart>
     );
   }
