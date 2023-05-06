@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext, useMemo } from "react";
 import { DeviceContext } from "../components/DeviceContext";
 import { Pagination, PageItem } from "react-bootstrap";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -21,16 +22,12 @@ export default function DevicePagination() {
         }
       })
       .catch(function (error) {
-        if (error.response) {
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          console.log(error.request);
-        } else {
-          console.log("Error", error.message);
-        }
-        console.log(error.config);
+        Swal.fire({
+          title: "Error!",
+          text: error ? error : "Error",
+          icon: "error",
+          confirmButtonText: "Okay",
+        });
       });
   }, [device]);
 

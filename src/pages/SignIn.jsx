@@ -1,37 +1,38 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Form, Container, Button } from "react-bootstrap";
+import { Form, Container, Button, Spinner, Row } from "react-bootstrap";
+import Swal from "sweetalert2";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function SignIn() {
+  const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
     axios
       .post(API_BASE_URL + "/signin", {
         username,
         password,
       })
       .then((response) => {
+        setLoading(false);
         localStorage.setItem("authenticated", true);
         navigate("/dashboard");
       })
-      .catch(function (error) {
-        if (error.response) {
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          console.log(error.request);
-        } else {
-          console.log("Error", error.message);
-        }
-        console.log(error.config);
+      .catch(async function (error) {
+        Swal.fire({
+          title: "Error!",
+          text: error ? error : "Error",
+          icon: "error",
+          confirmButtonText: "Okaz",
+        });
+        setLoading(false);
       });
   };
 
@@ -60,9 +61,11 @@ export default function SignIn() {
               required
             />
           </Form.Group>
-          <Button variant="primary" type="submit">
-            Sing in
-          </Button>
+          <div className="d-grid gap-2">
+            <Button variant="primary" type="submit">
+              {loading ? <Spinner size="sm" /> : "Signin"}
+            </Button>
+          </div>
         </div>
       </Form>
     </Container>

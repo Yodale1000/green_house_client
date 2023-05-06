@@ -11,7 +11,9 @@ export default function TemperatureChart({ data }) {
   const series = [
     {
       name: "Temperature",
-      data: chartData,
+      data: chartData.map((obj) => {
+        return [Date.parse(obj.timestamp), obj.value.toFixed(2)];
+      }),
     },
   ];
 
@@ -20,6 +22,9 @@ export default function TemperatureChart({ data }) {
       chart: {
         height: 350,
         type: "area",
+        zoom: {
+          autoScaleYaxis: true,
+        },
       },
       dataLabels: {
         enabled: true,
@@ -27,8 +32,19 @@ export default function TemperatureChart({ data }) {
       stroke: {
         curve: "smooth",
       },
-      noData: {
-        text: "Loading...",
+    },
+    noData: {
+      text: "No Data",
+    },
+    title: {
+      text: "Temperature (C)",
+    },
+    xaxis: {
+      type: "datetime",
+    },
+    tooltip: {
+      x: {
+        format: "HH:mm dd MMM yyyy",
       },
     },
   };

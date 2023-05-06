@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { DeviceContext } from "../components/DeviceContext";
-import { Container, Row, Col, ButtonGroup } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  ButtonGroup,
+  Button,
+  Spinner,
+} from "react-bootstrap";
+import { ArrowClockwise } from "react-bootstrap-icons";
 import axios from "axios";
 import AddDevice from "../components/AddDevice";
 import EditDevice from "../components/EditDevice";
@@ -10,45 +18,55 @@ import TemperatureChart from "../components/charts/TemperatureChart";
 import HumidityChart from "../components/charts/HumidityChart";
 import LightChart from "../components/charts/LightChart";
 import DevicePagination from "../components/DevicePagination";
+import Swal from "sweetalert2";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Dashboard() {
   let [device, setDevice] = useState(null);
   let [chartData, setChartData] = useState([]);
+  let [fetching, setFetching] = useState(false);
+
+  async function fetchChartData() {
+    setFetching(true);
+    axios
+      .get(API_BASE_URL + "/sensorData", { params: { deviceId: device._id } })
+      .then((response) => {
+        setFetching(false);
+        setChartData(response.data);
+      })
+      .catch(function (error) {
+        setFetching(false);
+        Swal.fire({
+          title: "Error!",
+          text: error ? error : "Error",
+          icon: "error",
+          confirmButtonText: "Okay",
+        });
+      });
+  }
 
   useEffect(() => {
     if (device) {
-      axios
-        .get(API_BASE_URL + "/sensorData", {
-          data: { deviceId: device._id },
-        })
-        .then((response) => {
-          setChartData(response.data);
-        })
-        .catch(function (error) {
-          if (error.response) {
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-          } else if (error.request) {
-            console.log(error.request);
-          } else {
-            console.log("Error", error.message);
-          }
-          console.log(error.config);
-        });
+      fetchChartData();
     }
   }, [device]);
 
   return (
-    <div className="p-2 bg-body-tertiary border rounded-3">
-      <Container fluid>
+    <div className="d-flex justify-content-center align-items-center vh-100">
+      <Container fluid className="p-2 bg-body-tertiary border rounded-3 m-3">
         <Row>
           <div className="d-flex justify-content-between">
             <DeviceContext.Provider value={[device, setDevice]}>
               <DevicePagination></DevicePagination>
               <ButtonGroup>
+                <Button
+                  className="d-flex align-items-center"
+                  variant="info"
+                  onClick={fetchChartData}
+                >
+                  {fetching ? <Spinner size="sm" /> : <ArrowClockwise />}
+                </Button>
                 <AddDevice></AddDevice>
                 <EditDevice></EditDevice>
                 <RemoveDevice></RemoveDevice>
@@ -57,6 +75,7 @@ export default function Dashboard() {
             </DeviceContext.Provider>
           </div>
         </Row>
+        <hr></hr>
         <Row>
           <Col>
             <TemperatureChart data={chartData}></TemperatureChart>

@@ -4,14 +4,23 @@ export default function LightChart({ data }) {
   const chartData = data.map((item) => {
     return {
       timestamp: item.timestamp,
-      value: item.lightReading.value,
+      visible_plus_ir_value: item.lightReading.visible_plus_ir_value,
+      infrared_value: item.lightReading.infrared_value,
     };
   });
 
   const series = [
     {
-      name: "Light",
-      data: chartData,
+      name: "Visible + IR",
+      data: chartData.map((obj) => {
+        return [Date.parse(obj.timestamp), obj.visible_plus_ir_value];
+      }),
+    },
+    {
+      name: "Infrared",
+      data: chartData.map((obj) => {
+        return [Date.parse(obj.timestamp), obj.infrared_value];
+      }),
     },
   ];
 
@@ -20,6 +29,9 @@ export default function LightChart({ data }) {
       chart: {
         height: 350,
         type: "area",
+        zoom: {
+          autoScaleYaxis: true,
+        },
       },
       dataLabels: {
         enabled: true,
@@ -27,8 +39,22 @@ export default function LightChart({ data }) {
       stroke: {
         curve: "smooth",
       },
-      noData: {
-        text: "Loading...",
+      xaxis: {
+        type: "datetime",
+      },
+    },
+    noData: {
+      text: "No Data",
+    },
+    title: {
+      text: "Light (Lux)",
+    },
+    xaxis: {
+      type: "datetime",
+    },
+    tooltip: {
+      x: {
+        format: "HH:mm dd MMM yyyy",
       },
     },
   };
