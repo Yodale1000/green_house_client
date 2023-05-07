@@ -14,9 +14,7 @@ import AddDevice from "../components/AddDevice";
 import EditDevice from "../components/EditDevice";
 import RemoveDevice from "../components/RemoveDevice";
 import SignOut from "../components/SignOut";
-import TemperatureChart from "../components/charts/TemperatureChart";
-import HumidityChart from "../components/charts/HumidityChart";
-import LightChart from "../components/charts/LightChart";
+import Chart from "../components/Chart";
 import DevicePagination from "../components/DevicePagination";
 import Swal from "sweetalert2";
 
@@ -24,32 +22,84 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Dashboard() {
   let [device, setDevice] = useState(null);
-  let [chartData, setChartData] = useState([]);
   let [fetching, setFetching] = useState(false);
+  let [temperatureSeries, setTemperatureSeries] = useState([]);
+  let [humiditySeries, setHumiditySeries] = useState([]);
+  let [lightSeries, setLightSeries] = useState([]);
 
   async function fetchChartData() {
     setFetching(true);
     axios
       .get(API_BASE_URL + "/sensorData", { params: { deviceId: device._id } })
       .then((response) => {
+        setTemperatureSeries([
+          {
+            name: "Temperature",
+            data: response.data.map((obj) => {
+              return [
+                Date.parse(obj.timestamp),
+                obj.temperatureReading.value.toFixed(2),
+              ];
+            }),
+          },
+        ]);
+        setTemperatureSeries([
+          {
+            name: "Temperature",
+            data: response.data.map((obj) => {
+              return [
+                Date.parse(obj.timestamp),
+                obj.temperatureReading.value.toFixed(2),
+              ];
+            }),
+          },
+        ]);
+        setHumiditySeries([
+          {
+            name: "Humidity",
+            data: response.data.map((obj) => {
+              return [
+                Date.parse(obj.timestamp),
+                obj.humidityReading.value.toFixed(2),
+              ];
+            }),
+          },
+        ]);
+        setLightSeries([
+          {
+            name: "Visible + IR",
+            data: response.data.map((obj) => {
+              return [
+                Date.parse(obj.timestamp),
+                obj.lightReading.visible_plus_ir_value,
+              ];
+            }),
+          },
+          {
+            name: "Infrared",
+            data: response.data.map((obj) => {
+              return [
+                Date.parse(obj.timestamp),
+                obj.lightReading.infrared_value,
+              ];
+            }),
+          },
+        ]);
         setFetching(false);
-        setChartData(response.data);
       })
       .catch(function (error) {
-        setFetching(false);
         Swal.fire({
           title: "Error!",
           text: error ? error : "Error",
           icon: "error",
           confirmButtonText: "Okay",
         });
+        setFetching(false);
       });
   }
 
   useEffect(() => {
-    if (device) {
-      fetchChartData();
-    }
+    fetchChartData();
   }, [device]);
 
   return (
@@ -78,13 +128,13 @@ export default function Dashboard() {
         <hr></hr>
         <Row>
           <Col>
-            <TemperatureChart data={chartData}></TemperatureChart>
+            <Chart series={temperatureSeries} title="Temperature (°C)"></Chart>
           </Col>
           <Col>
-            <HumidityChart data={chartData}></HumidityChart>
+            <Chart series={humiditySeries} title="Humidity (%)"></Chart>
           </Col>
           <Col>
-            <LightChart data={chartData}></LightChart>
+            <Chart series={lightSeries} title="Light (Lx)"></Chart>
           </Col>
         </Row>
       </Container>

@@ -1,22 +1,6 @@
 import Chart from "react-apexcharts";
 
-export default function TemperatureChart({ data }) {
-  const chartData = data.map((item) => {
-    return {
-      timestamp: item.timestamp,
-      value: item.temperatureReading.value,
-    };
-  });
-
-  const series = [
-    {
-      name: "Temperature",
-      data: chartData.map((obj) => {
-        return [Date.parse(obj.timestamp), obj.value.toFixed(2)];
-      }),
-    },
-  ];
-
+export default function MyChart(props) {
   const options = {
     options: {
       chart: {
@@ -37,7 +21,7 @@ export default function TemperatureChart({ data }) {
       text: "No Data",
     },
     title: {
-      text: "Temperature (C)",
+      text: props.title,
     },
     xaxis: {
       type: "datetime",
@@ -49,5 +33,7 @@ export default function TemperatureChart({ data }) {
     },
   };
 
-  return <Chart options={options} series={series} type="area" height={350} />;
+  return (
+    <Chart options={options} series={props.series} type="area" height={350} />
+  );
 }
