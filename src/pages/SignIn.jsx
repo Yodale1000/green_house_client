@@ -30,7 +30,7 @@ export default function SignIn() {
           title: "Error!",
           text: error ? error : "Error",
           icon: "error",
-          confirmButtonText: "Okaz",
+          confirmButtonText: "Okay",
         });
         setLoading(false);
       });
